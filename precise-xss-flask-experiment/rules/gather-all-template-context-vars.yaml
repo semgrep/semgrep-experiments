@@ -1,0 +1,7 @@
+rules:
+- id: template-context-var
+  message: $TEMPLATEVAR
+  languages:
+  - python
+  severity: WARNING
+  pattern: flask.render_template(..., $TEMPLATEVAR=$VAR, ...)

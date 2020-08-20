@@ -1,0 +1,109 @@
+rules:
+- id: unescaped-vars-markup
+  message: $TEMPLATEVAR
+  languages:
+  - python
+  severity: WARNING
+  equivalences:
+  - equivalence: flask.request.$W <==> request.$W
+  patterns:
+  - pattern-either:
+    - patterns:
+      - pattern-inside: |
+          @$APP.route(...)
+          def $FUNC(..., $USERDATA, ...):
+            ...
+      - pattern-either:
+        - pattern: |
+            flask.render_template(..., $TEMPLATEVAR=flask.Markup(..., $USERDATA, ...), ...)
+        - pattern: |
+            $VAR = flask.Markup(..., $USERDATA, ...)
+            ...
+            flask.render_template(..., $TEMPLATEVAR=$VAR, ...)
+    - patterns:
+      - pattern-inside: |
+          def $FUNC(...):
+            ...
+      - pattern-inside: |
+          $USERDATA = flask.request.$W.get(...)
+          ...
+      - pattern-either:
+        - pattern: |
+            flask.render_template(..., $TEMPLATEVAR=flask.Markup(..., $USERDATA, ...), ...)
+        - pattern: |
+            $VAR = flask.Markup(..., $USERDATA, ...)
+            ...
+            flask.render_template(..., $TEMPLATEVAR=$VAR, ...)
+    - patterns:
+      - pattern-inside: |
+          def $FUNC(...):
+            ...
+      - pattern-inside: |
+          $USERDATA = flask.request.$W.get(...)
+          ...
+      - pattern-either:
+        - pattern: |
+            flask.render_template(..., $TEMPLATEVAR=flask.Markup(..., $USERDATA, ...), ...)
+        - pattern: |
+            $VAR = flask.Markup(..., $USERDATA, ...)
+            ...
+            flask.render_template(..., $TEMPLATEVAR=$VAR, ...)
+    - patterns:
+      - pattern-inside: |
+          def $FUNC(...):
+            ...
+      - pattern-inside: |
+          $USERDATA = flask.request.$W[...]
+          ...
+      - pattern-either:
+        - pattern: |
+            flask.render_template(..., $TEMPLATEVAR=flask.Markup(..., $USERDATA, ...), ...)
+        - pattern: |
+            $VAR = flask.Markup(..., $USERDATA, ...)
+            ...
+            flask.render_template(..., $TEMPLATEVAR=$VAR, ...)
+- id: unescaped-vars-unescaped-extension
+  message: $TEMPLATEVAR
+  languages:
+  - python
+  severity: WARNING
+  equivalences:
+  - equivalence: flask.request.$W <==> request.$W
+  patterns:
+  - pattern-not-inside: |
+      flask.render_template("=~/.+\.html$/", ...)
+  - pattern-either:
+    - patterns:
+      - pattern-inside: |
+          @$APP.route(...)
+          def $FUNC(..., $USERDATA, ...):
+            ...
+      - pattern: |
+          flask.render_template(..., $TEMPLATEVAR=$USERDATA, ...)
+    - patterns:
+      - pattern-inside: |
+          def $FUNC(...):
+            ...
+      - pattern-inside: |
+          $USERDATA = flask.request.$W.get(...)
+          ...
+      - pattern: |
+          flask.render_template(..., $TEMPLATEVAR=$USERDATA, ...)
+    - patterns:
+      - pattern-inside: |
+          def $FUNC(...):
+            ...
+      - pattern-inside: |
+          $USERDATA = flask.request.$W.get(...)
+          ...
+      - pattern: |
+          flask.render_template(..., $TEMPLATEVAR=$USERDATA, ...)
+    - patterns:
+      - pattern-inside: |
+          def $FUNC(...):
+            ...
+      - pattern-inside: |
+          $USERDATA = flask.request.$W[...]
+          ...
+      - pattern: |
+          flask.render_template(..., $TEMPLATEVAR=$USERDATA, ...)

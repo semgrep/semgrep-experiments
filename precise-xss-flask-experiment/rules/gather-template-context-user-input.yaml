@@ -1,0 +1,23 @@
+rules:
+- id: user-input-template-context-var
+  message: $TEMPLATEVAR
+  languages:
+  - python
+  severity: WARNING
+  patterns:
+  - pattern-either:
+    - pattern: |
+        flask.render_template(..., $TEMPLATEVAR=flask.request.$W.get(...), ...)
+    - pattern: |
+        $USERDATA = flask.request.$W.get(...)
+        ...
+        flask.render_template(..., $TEMPLATEVAR=$USERDATA, ...)
+    - pattern: |
+        $USERDATA = request.$W.get(...)
+        ...
+        flask.render_template(..., $TEMPLATEVAR=$USERDATA, ...)
+    - pattern: |
+        @$APP.route(...)
+        def $FUNC(..., $USERDATA, ...):
+          ...
+          flask.render_template(..., $TEMPLATEVAR=$USERDATA, ...)
